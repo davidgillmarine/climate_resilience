@@ -1,7 +1,7 @@
 #install.packages('pacman') # run once
 
 # load packages and set directories
-pacman::p_load(rnaturalearth,stars,cubelyr, viridis,lubridate,ggthemes,tidyverse)
+pacman::p_load(rnaturalearth,stars,cubelyr, raster,viridis,lubridate,ggthemes,tidyverse)
 pcdir <- "R:/Gill/research/climate-resilience"
 inputdir <- paste0(pcdir, "/Indonesia_NS/Data/")
 outputdir <- paste0(pcdir, "/Indonesia_NS/Data/")
@@ -12,7 +12,7 @@ r = read_stars(paste0(inputdir,"1979-2020_allvariables.nc"))
 indonesia <- ne_countries(scale = 110, country = 'indonesia',returnclass = "sf") %>% 
   st_crop(st_bbox(r))
 plot(st_geometry(indonesia))
-
+#dhw <- read_stars('https://') # example
 
 # --- Yearly values ----
 # get time values
@@ -24,6 +24,8 @@ yr.time.val
 by_t = "1 year"   # set time intervals
 r.agg.yr <- aggregate(r, by = by_t, FUN = mean) # average values by year
 r.agg.yr <- st_set_dimensions(r.agg.yr, "time", values = yr.time.val, names = "year") # convert date to years
+r.agg.yr <- mutate(r.agg.yr,sst = sst-273.15)  # convert SST from Kelvin to C
+
 
 # Anomaly function
 fn_anom <-  function(x) ((x-mean(x, na.rm=T))/sd(x,na.rm=T)) # function to calculate anomalies (in standard deviation units as example)
@@ -132,4 +134,7 @@ ggplot(yr.mean.avg, aes(x=year, y=val)) +
   theme_classic()
 ggsave(paste0(outputdir,'time_series.png'),width = 10,height = 7)
 
+
+
+ 
 
